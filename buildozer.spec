@@ -36,7 +36,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pyqt6,python-docx,openpyxl,python-pptx,pymupdf,pandas,pillow,numpy,pyspellchecker,pygments
+requirements = python3,kivy,sqlite3,requests,urllib3,chardet,certifi,idna,pillow
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
