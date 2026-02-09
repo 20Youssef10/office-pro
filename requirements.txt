@@ -1,0 +1,38 @@
+# Office Pro - Professional Office Suite
+# Core Dependencies
+PyQt6>=6.4.0
+PyQt6-Charts>=6.4.0
+
+# Document Processing
+python-docx>=0.8.11
+openpyxl>=3.0.10
+python-pptx>=0.6.21
+
+# PDF Processing
+PyMuPDF>=1.21.0
+
+# Data Processing
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Image Processing
+Pillow>=9.0.0
+
+# Spell Checking (Optional)
+pyspellchecker>=0.7.0
+
+# Optional Dependencies for Enhanced Features
+# Uncomment if needed:
+
+# For ODF support (OpenDocument formats)
+# odfpy>=1.4.1
+
+# For RTF support
+# pyth>=0.6.0
+
+# For advanced PDF operations
+# reportlab>=3.6.0
+# pdf2image>=1.16.0
+
+# For syntax highlighting in code blocks
+# Pygments>=2.13.0
