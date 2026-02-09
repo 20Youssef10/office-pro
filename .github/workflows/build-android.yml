@@ -24,10 +24,13 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          docker.io \
           git \
           zip \
           unzip
+
+    - name: Verify Docker
+      run: |
+        docker --version
     
     - name: Cache buildozer dependencies
       uses: actions/cache@v4
@@ -81,10 +84,13 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          docker.io \
           git \
           zip \
           unzip
+
+    - name: Verify Docker
+      run: |
+        docker --version
     
     - name: Generate keystore
       run: |
