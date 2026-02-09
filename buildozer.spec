@@ -51,8 +51,8 @@ requirements = python3,kivy,pyqt6,python-docx,openpyxl,python-pptx,pymupdf,panda
 # (str) Icon of the application
 #icon.filename = %(source.dir)s/assets/icon.png
 
-# (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
-orientation = all
+# (list) Supported orientations
+orientation = portrait,landscape
 
 # (list) List of service to declare
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
