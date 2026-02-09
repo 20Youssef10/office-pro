@@ -2,6 +2,7 @@
 """
 Office Pro - Android Entry Point
 This is the main entry point for Android APK conversion using Kivy
+Minimal version for successful build
 """
 
 import os
@@ -11,43 +12,31 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Kivy imports for Android compatibility
-try:
-    from kivy.app import App
-    from kivy.uix.boxlayout import BoxLayout
-    from kivy.uix.button import Button
-    from kivy.uix.label import Label
-    from kivy.uix.gridlayout import GridLayout
-    from kivy.uix.screenmanager import ScreenManager, Screen
-    from kivy.core.window import Window
-    from kivy.config import Config
-    from kivy.properties import ObjectProperty
-    from kivy.uix.popup import Popup
-    from kivy.uix.filechooser import FileChooserListView
-    from kivy.uix.textinput import TextInput
-    from kivy.uix.scrollview import ScrollView
-    from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader
-    from kivy.graphics import Color, Rectangle
-    from kivy.utils import platform
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.core.window import Window
+from kivy.config import Config
+from kivy.uix.popup import Popup
+from kivy.utils import platform
 
-    KIVY_AVAILABLE = True
-except ImportError:
-    KIVY_AVAILABLE = False
-    print("Kivy not available, falling back to console mode")
-
-# Mobile-specific imports
 if platform == "android":
-    from android.permissions import request_permissions, Permission
-    from android.storage import primary_external_storage_path
-    from jnius import autoclass
+    try:
+        from android.permissions import request_permissions, Permission
+        from android.storage import primary_external_storage_path
 
-    # Request permissions on Android
-    request_permissions(
-        [
-            Permission.READ_EXTERNAL_STORAGE,
-            Permission.WRITE_EXTERNAL_STORAGE,
-            Permission.INTERNET,
-        ]
-    )
+        request_permissions(
+            [
+                Permission.READ_EXTERNAL_STORAGE,
+                Permission.WRITE_EXTERNAL_STORAGE,
+                Permission.INTERNET,
+            ]
+        )
+    except:
+        pass
 
 # Import Office Pro modules
 from modules.word_processor_mobile import WordProcessorMobile
@@ -72,7 +61,7 @@ class MainMenuScreen(Screen):
             markup=True,
             font_size="32sp",
             size_hint_y=0.15,
-            color=(0.17, 0.34, 0.6, 1),  # Office blue
+            color=(0.17, 0.34, 0.6, 1),
         )
         layout.add_widget(title)
 
@@ -150,16 +139,16 @@ class MainMenuScreen(Screen):
 
     def open_presentation(self, instance):
         """Open Presentation"""
-        self.show_popup("Presentation", "Coming soon in v2.0!")
+        popup = Popup(
+            title="Presentation",
+            content=Label(text="Coming soon in v2.0!"),
+            size_hint=(0.8, 0.4),
+        )
+        popup.open()
 
     def open_pdf(self, instance):
         """Open PDF Editor"""
         self.manager.current = "pdf"
-
-    def show_popup(self, title, message):
-        """Show popup message"""
-        popup = Popup(title=title, content=Label(text=message), size_hint=(0.8, 0.4))
-        popup.open()
 
 
 class OfficeProApp(App):
@@ -167,13 +156,9 @@ class OfficeProApp(App):
 
     def build(self):
         """Build the application"""
-        # Set window background color
         Window.clearcolor = (0.95, 0.95, 0.95, 1)
 
-        # Create screen manager
         sm = ScreenManager()
-
-        # Add screens
         sm.add_widget(MainMenuScreen(name="menu"))
         sm.add_widget(WordProcessorMobile(name="word"))
         sm.add_widget(SpreadsheetMobile(name="spreadsheet"))
@@ -190,23 +175,5 @@ class OfficeProApp(App):
         pass
 
 
-def main():
-    """Main entry point"""
-    if KIVY_AVAILABLE:
-        # Run Kivy app
-        OfficeProApp().run()
-    else:
-        # Fallback to console mode
-        print("=" * 50)
-        print("Office Pro - Console Mode")
-        print("=" * 50)
-        print("\nKivy not available. To run the full GUI:")
-        print("1. Install Kivy: pip install kivy")
-        print("2. Run: python main_android.py")
-        print("\nFor Android APK, use Buildozer:")
-        print("1. Install buildozer: pip install buildozer")
-        print("2. Run: buildozer android debug")
-
-
 if __name__ == "__main__":
-    main()
+    OfficeProApp().run()

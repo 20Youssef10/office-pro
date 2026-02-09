@@ -1,34 +1,22 @@
 """
 Spreadsheet Mobile Module
-Kivy-based mobile-optimized spreadsheet
+Kivy-based mobile-optimized spreadsheet - Minimal version for Android
 """
 
 import os
 import csv
 from pathlib import Path
 
-try:
-    from kivy.uix.screenmanager import Screen
-    from kivy.uix.boxlayout import BoxLayout
-    from kivy.uix.textinput import TextInput
-    from kivy.uix.button import Button
-    from kivy.uix.gridlayout import GridLayout
-    from kivy.uix.scrollview import ScrollView
-    from kivy.uix.popup import Popup
-    from kivy.uix.label import Label
-    from kivy.uix.filechooser import FileChooserListView
-    from kivy.utils import platform
-
-    KIVY_AVAILABLE = True
-except ImportError:
-    KIVY_AVAILABLE = False
-
-try:
-    import openpyxl
-
-    OPENPYXL_AVAILABLE = True
-except ImportError:
-    OPENPYXL_AVAILABLE = False
+from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.filechooser import FileChooserListView
+from kivy.utils import platform
 
 
 class SpreadsheetMobile(Screen):
@@ -38,7 +26,7 @@ class SpreadsheetMobile(Screen):
         super().__init__(**kwargs)
         self.current_file = None
         self.is_modified = False
-        self.cells = {}  # Dictionary to store cell data
+        self.cells = {}
         self.current_row = 0
         self.current_col = 0
         self.build_ui()
@@ -96,7 +84,7 @@ class SpreadsheetMobile(Screen):
         for col in range(4):
             self.grid.add_widget(
                 Label(
-                    text=chr(65 + col),  # A, B, C, D
+                    text=chr(65 + col),
                     size_hint_y=None,
                     height=40,
                     bold=True,
@@ -123,7 +111,7 @@ class SpreadsheetMobile(Screen):
 
     def on_cell_focus(self, instance, value):
         """Handle cell focus"""
-        if value:  # Cell got focus
+        if value:
             self.current_row = instance.row
             self.current_col = instance.col
             self.update_cell_ref()
@@ -207,7 +195,7 @@ class SpreadsheetMobile(Screen):
         """Open file dialog"""
         content = BoxLayout(orientation="vertical")
         filechooser = FileChooserListView(
-            path=self.get_documents_path(), filters=["*.xlsx", "*.csv", "*.xls"]
+            path=self.get_documents_path(), filters=["*.csv"]
         )
         content.add_widget(filechooser)
 
@@ -228,9 +216,12 @@ class SpreadsheetMobile(Screen):
     def get_documents_path(self):
         """Get documents path"""
         if platform == "android":
-            from android.storage import primary_external_storage_path
+            try:
+                from android.storage import primary_external_storage_path
 
-            return primary_external_storage_path()
+                return primary_external_storage_path()
+            except:
+                return os.path.expanduser("~")
         else:
             return os.path.expanduser("~")
 
@@ -240,12 +231,7 @@ class SpreadsheetMobile(Screen):
             file_path = selection[0]
             try:
                 self.clear_all_cells()
-
-                if file_path.endswith(".xlsx") and OPENPYXL_AVAILABLE:
-                    self.load_xlsx(file_path)
-                elif file_path.endswith(".csv"):
-                    self.load_csv(file_path)
-
+                self.load_csv(file_path)
                 self.current_file = file_path
                 self.is_modified = False
                 self.popup.dismiss()
@@ -253,19 +239,6 @@ class SpreadsheetMobile(Screen):
 
             except Exception as e:
                 self.show_error(f"Error loading file: {str(e)}")
-
-    def load_xlsx(self, file_path):
-        """Load Excel file"""
-        wb = openpyxl.load_workbook(file_path, data_only=True)
-        ws = wb.active
-
-        for row in range(min(20, ws.max_row)):
-            for col in range(min(4, ws.max_column)):
-                cell = ws.cell(row=row + 1, column=col + 1)
-                if cell.value:
-                    key = (row, col)
-                    if key in self.cells:
-                        self.cells[key].text = str(cell.value)
 
     def load_csv(self, file_path):
         """Load CSV file"""
@@ -313,8 +286,8 @@ class SpreadsheetMobile(Screen):
     def perform_save_as(self, filename):
         """Perform save as"""
         if filename:
-            if not filename.endswith((".xlsx", ".csv")):
-                filename += ".xlsx"
+            if not filename.endswith(".csv"):
+                filename += ".csv"
             file_path = os.path.join(self.get_documents_path(), filename)
             self.save_to_file(file_path)
             self.popup.dismiss()
@@ -322,28 +295,13 @@ class SpreadsheetMobile(Screen):
     def save_to_file(self, file_path):
         """Save to file"""
         try:
-            if file_path.endswith(".xlsx") and OPENPYXL_AVAILABLE:
-                self.save_xlsx(file_path)
-            else:
-                self.save_csv(file_path.replace(".xlsx", ".csv"))
-
+            self.save_csv(file_path)
             self.current_file = file_path
             self.is_modified = False
             self.show_message("Saved successfully!")
 
         except Exception as e:
             self.show_error(f"Error saving file: {str(e)}")
-
-    def save_xlsx(self, file_path):
-        """Save as Excel"""
-        wb = openpyxl.Workbook()
-        ws = wb.active
-
-        for (row, col), cell in self.cells.items():
-            if cell.text:
-                ws.cell(row=row + 1, column=col + 1, value=cell.text)
-
-        wb.save(file_path)
 
     def save_csv(self, file_path):
         """Save as CSV"""

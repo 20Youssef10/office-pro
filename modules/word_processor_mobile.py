@@ -1,40 +1,28 @@
 """
 Word Processor Mobile Module
-Kivy-based mobile-optimized word processor
+Kivy-based mobile-optimized word processor - Minimal version for Android
 """
 
 import os
 from pathlib import Path
 
-try:
-    from kivy.uix.screenmanager import Screen
-    from kivy.uix.boxlayout import BoxLayout
-    from kivy.uix.textinput import TextInput
-    from kivy.uix.button import Button
-    from kivy.uix.gridlayout import GridLayout
-    from kivy.uix.scrollview import ScrollView
-    from kivy.uix.popup import Popup
-    from kivy.uix.label import Label
-    from kivy.uix.filechooser import FileChooserListView
-    from kivy.core.window import Window
-    from kivy.properties import ObjectProperty
-    from kivy.utils import platform
+from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.filechooser import FileChooserListView
+from kivy.utils import platform
 
-    if platform == "android":
+if platform == "android":
+    try:
         from android.permissions import request_permissions, Permission
         from android.storage import primary_external_storage_path
-
-    KIVY_AVAILABLE = True
-except ImportError:
-    KIVY_AVAILABLE = False
-    print("Kivy not available")
-
-try:
-    from docx import Document
-
-    DOCX_AVAILABLE = True
-except ImportError:
-    DOCX_AVAILABLE = False
+    except ImportError:
+        pass
 
 
 class WordProcessorMobile(Screen):
@@ -90,13 +78,21 @@ class WordProcessorMobile(Screen):
     def open_file(self, instance):
         """Open file dialog"""
         if platform == "android":
-            request_permissions(
-                [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE]
-            )
+            try:
+                from android.permissions import request_permissions, Permission
+
+                request_permissions(
+                    [
+                        Permission.READ_EXTERNAL_STORAGE,
+                        Permission.WRITE_EXTERNAL_STORAGE,
+                    ]
+                )
+            except:
+                pass
 
         content = BoxLayout(orientation="vertical")
         filechooser = FileChooserListView(
-            path=self.get_documents_path(), filters=["*.txt", "*.docx", "*.doc"]
+            path=self.get_documents_path(), filters=["*.txt"]
         )
         content.add_widget(filechooser)
 
@@ -117,7 +113,12 @@ class WordProcessorMobile(Screen):
     def get_documents_path(self):
         """Get documents path"""
         if platform == "android":
-            return primary_external_storage_path()
+            try:
+                from android.storage import primary_external_storage_path
+
+                return primary_external_storage_path()
+            except:
+                return os.path.expanduser("~")
         else:
             return os.path.expanduser("~")
 
@@ -126,13 +127,8 @@ class WordProcessorMobile(Screen):
         if selection:
             file_path = selection[0]
             try:
-                if file_path.endswith(".docx") and DOCX_AVAILABLE:
-                    doc = Document(file_path)
-                    text = "\n".join([para.text for para in doc.paragraphs])
-                    self.editor.text = text
-                else:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        self.editor.text = f.read()
+                with open(file_path, "r", encoding="utf-8") as f:
+                    self.editor.text = f.read()
 
                 self.current_file = file_path
                 self.is_modified = False
@@ -185,14 +181,8 @@ class WordProcessorMobile(Screen):
     def save_to_file(self, file_path):
         """Save text to file"""
         try:
-            if file_path.endswith(".docx") and DOCX_AVAILABLE:
-                doc = Document()
-                for para_text in self.editor.text.split("\n"):
-                    doc.add_paragraph(para_text)
-                doc.save(file_path)
-            else:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(self.editor.text)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(self.editor.text)
 
             self.current_file = file_path
             self.is_modified = False
