@@ -57,10 +57,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython kivy
     
+    - name: Setup Android SDK
+      run: |
+        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        cd $ANDROID_HOME/cmdline-tools
+        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools.zip
+        mv cmdline-tools latest
+        yes | latest/bin/sdkmanager --licenses
+        latest/bin/sdkmanager "build-tools;33.0.0" "platform-tools" "platforms;android-33"
+    
     - name: Build APK
       run: |
         buildozer android debug
       timeout-minutes: 120
+      env:
+        ANDROID_HOME: ${{ github.workspace }}/.buildozer/android/platform/android-sdk
     
     - name: List built APKs
       run: |
@@ -122,6 +136,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython kivy
     
+    - name: Setup Android SDK
+      run: |
+        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        cd $ANDROID_HOME/cmdline-tools
+        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools.zip
+        mv cmdline-tools latest
+        yes | latest/bin/sdkmanager --licenses
+        latest/bin/sdkmanager "build-tools;33.0.0" "platform-tools" "platforms;android-33"
+    
     - name: Generate keystore
       run: |
         keytool -genkey -v \
@@ -138,6 +164,8 @@ jobs:
       run: |
         buildozer android release
       timeout-minutes: 120
+      env:
+        ANDROID_HOME: ${{ github.workspace }}/.buildozer/android/platform/android-sdk
     
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
