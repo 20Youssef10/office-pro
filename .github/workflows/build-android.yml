@@ -43,14 +43,6 @@ jobs:
           libssl-dev \
           automake
     
-    - name: Fix libtool configuration
-      run: |
-        libtoolize --force
-        aclocal
-        autoheader
-        autoconf
-        automake --force-missing --add-missing || true
-    
     - name: Cache buildozer dependencies
       uses: actions/cache@v4
       with:
@@ -131,14 +123,6 @@ jobs:
           libffi-dev \
           libssl-dev \
           automake
-    
-    - name: Fix libtool configuration
-      run: |
-        libtoolize --force
-        aclocal
-        autoheader
-        autoconf
-        automake --force-missing --add-missing || true
     
     - name: Install buildozer
       run: |
